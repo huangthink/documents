@@ -1,0 +1,50 @@
+yum install -y gcc git
+
+#client
+wget -N http://jaist.dl.sourceforge.net/project/fastdfs/Java%20Client%20API%20Source%20Code/Java%20Client%20API%20Source%20Code%20V1.25/fastdfs_client_java._v1.25.tar.gz
+
+
+##server
+#libfastcommon
+cd /tmp
+git clone https://github.com/happyfish100/libfastcommon.git
+cd libfastcommon
+./make.sh
+./make.sh install
+
+
+#fastdfs
+cd /tmp
+wget -N http://ftp.jaist.ac.jp/pub/sourceforge/f/fa/fastdfs/FastDFS%20Server%20Source%20Code/FastDFS%20Server%20with%20PHP%20Extension%20Source%20Code%20V5.05/FastDFS_v5.05.tar.gz
+tar -zxf FastDFS_v5.05.tar.gz
+cd FastDFS
+./make.sh
+./make.sh install
+
+
+#tracker
+useradd fdfs_tracker
+cp /etc/fdfs/tracker.conf.sample /etc/fdfs/tracker.conf
+vi /etc/fdfs/tracker.conf
+	base_path=/home/fdfs_tracker
+cp /usr/bin/fdfs_trackerd /usr/local/bin/
+cp stop.sh /usr/local/bin/
+cp restart.sh /usr/local/bin/  
+
+service fdfs_trackerd start
+
+
+#storage
+useradd fdfs_storage
+mkdir /home/fdfs_storage/path0
+cp /etc/fdfs/storage.conf.sample /etc/fdfs/storage.conf
+vi /etc/fdfs/storage.conf
+	group_name=group1
+	base_path=/home/fdfs_storage
+	store_path0=/home/fdfs_storage/path0
+	tracker_server=192.168.19.171:22122
+cp /usr/bin/fdfs_storaged /usr/local/bin
+cp stop.sh /usr/local/bin/
+cp restart.sh /usr/local/bin/  
+
+service fdfs_storaged start

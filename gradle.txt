@@ -1,0 +1,10 @@
+#root用户
+cd /tmp
+wget -N https://services.gradle.org/distributions/gradle-1.11-bin.zip
+unzip gradle-1.11-bin.zip
+mv gradle-1.11 /opt/gradle
+echo 'export PATH=$PATH:/opt/gradle/bin' >> /etc/profile
+
+#普通用户
+source /etc/profile
+gradle --version

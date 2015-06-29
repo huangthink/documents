@@ -1,0 +1,15 @@
+#root用户
+yum install automake libtool flex bison pkgconfig gcc-c++ boost-devel libevent-devel zlib-devel python-devel ruby-devel openssl openssl-devel
+
+cd /tmp
+wget -N http://archive.apache.org/dist/thrift/0.9.0/thrift-0.9.0.tar.gz
+tar -zxf thrift-0.9.0.tar.gz
+cd thrift-0.9.0
+./configure --prefix=/opt/thrift -with-cpp=no
+make
+make install
+echo 'export PATH=$PATH:/opt/thrift/bin' >> /etc/profile
+
+#普通用户
+source /etc/profile
+thrift -version

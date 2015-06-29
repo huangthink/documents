@@ -1,0 +1,73 @@
+cd /tmp
+wget -N http://mirror.bit.edu.cn/apache/hadoop/common/hadoop-2.5.1/hadoop-2.5.1.tar.gz
+tar zxf hadoop-2.5.1.tar.gz
+mv /tmp/hadoop-2.5.1 /opt/hadoop
+cd /opt/hadoop
+vi /etc/profile
+echo 'export HADOOP_INSTALL=/opt/hadoop' >> /etc/profile
+echo 'export PATH=$PATH:$HADOOP_INSTALL/bin' >> /etc/profile
+source /etc/profile
+
+
+core-site.xml
+<property>
+<name>fs.defaultFS</name>
+<value>hdfs://namenode:9000</value>
+</property>
+
+hdfs-site.xml
+<property>  
+   <name>dfs.replication</name>  
+   <value>3</value>  
+</property>
+
+mapred-site.xml
+<property>
+    <name>mapreduce.framework.name</name>
+    <value>yarn</value>
+ </property>
+ <property>
+    <name>mapreduce.jobhistory.address</name>
+    <value>namenode:10020</value>
+ </property>
+ <property>
+  <name>mapreduce.jobhistory.webapp.address</name>
+  <value>namenode:19888</value>
+</property>
+
+yarn-site.xml
+<property>  
+   <name>yarn.nodemanager.aux-services</name>  
+   <value>mapreduce_shuffle</value>  
+</property>  
+<property>  
+   <name>yarn.resourcemanager.address</name>  
+   <value>namenode:8032</value>  
+</property>  
+<property>  
+   <name>yarn.resourcemanager.scheduler.address</name>  
+   <value>namenode:8030</value>  
+</property>  
+<property>  
+   <name>yarn.resourcemanager.resource-tracker.address</name>  
+   <value>namenode:8031</value>  
+</property>  
+<property>  
+   <name>yarn.resourcemanager.admin.address</name>  
+   <value>namenode:8033</value>  
+</property>  
+<property>  
+   <name>yarn.resourcemanager.webapp.address</name>  
+   <value>namenode:8088</value>  
+</property>  
+
+slaves
+SlaveServer
+
+hadoop-env.sh和yarn-env.sh
+export JAVA_HOME=/opt/jdk
+
+hdfs namenode –format
+
+start-dfs.sh
+start-yarn.sh

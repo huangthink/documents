@@ -1,0 +1,7 @@
+#root用户
+cd /tmp
+wget -N http://download.redis.io/releases/redis-2.8.11.tar.gz
+tar zxf redis-2.8.11.tar.gz
+cd redis-2.8.11
+make
+make install

@@ -1,0 +1,66 @@
+#root用户
+cd /tmp
+wget -N http://apache.fayea.com/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz
+tar -zxf apache-maven-3.2.5-bin.tar.gz
+mv apache-maven-3.2.5 /usr/local/maven
+echo 'export PATH=$PATH:/usr/local/maven/bin' >> /etc/profile
+source /etc/profile
+mvn -version
+ 
+#项目pom.xml
+#增加以下配置,可以deploy到nexus's releases 或  snapshots
+<distributionManagement>
+	<repository>
+		<id>releases</id>
+		<url>http://127.0.0.1:8080/nexus/content/repositories/releases/</url>
+	</repository>
+	<snapshotRepository>
+		<id>snapshots</id>
+		<url>http://127.0.0.1:8080/nexus/content/repositories/snapshots/</url>
+	</snapshotRepository>
+</distributionManagement>
+
+#增加以下配置,可以deploy到nexus's 3rd party
+<distributionManagement>	
+	<repository>
+		<id>3rd party</id>
+		<url>http://127.0.0.1:8080/nexus/content/repositories/thirdparty/</url>
+	</repository>
+</distributionManagement>
+
+<!-- 源代码打包 -->
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-source-plugin</artifactId>
+  <configuration>
+    <attach>true</attach>
+  </configuration>
+  <executions>
+    <execution>
+      <phase>deploy</phase>
+      <goals>
+        <goal>jar-no-fork</goal>
+      </goals>
+    </execution>
+  </executions>
+</plugin>
+
+<!-- 跳过测试 -->
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-surefire-plugin</artifactId>
+  <configuration>
+    <skip>true</skip>
+  </configuration>
+</plugin>
+
+<!-- 指定jdk版本编译 -->
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <configuration>
+    <source>1.7</source>
+    <target>1.7</target>
+    <encoding>UTF-8</encoding>
+  </configuration>
+</plugin>

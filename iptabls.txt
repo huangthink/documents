@@ -1,0 +1,8 @@
+#关闭iptables
+service iptables stop
+
+#查看iptables是否开机启动
+chkconfig --list | grep iptables
+
+#iptables开机不启动
+chkconfig iptables off

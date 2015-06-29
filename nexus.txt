@@ -1,0 +1,80 @@
+#root用户
+cd /tmp
+wget -N http://www.sonatype.org/downloads/nexus-2.3.1.war
+mkdir -p /opt/nexus/webapps
+cd /opt/nexus/webapps
+jar xf /tmp/nexus-2.3.1.war
+#修改nexus的工作目录
+sed -i "s/\${user.home}/\/opt\/nexus/g" /opt/nexus/webapps/WEB-INF/plexus.properties
+#加入tomcat
+mkdir -p /opt/tomcat/conf/Catalina/localhost/
+cat >> /opt/tomcat/conf/Catalina/localhost/nexus.xml << EOF
+<?xml version="1.0" encoding="UTF-8" ?>
+<Context docBase="/opt/nexus/webapps">
+</Context>
+EOF
+
+#重启tomcat
+/opt/tomcat/bin/shutdown.sh
+/opt/tomcat/bin/startup.sh
+
+#登录
+http://127.0.0.1:8080/nexus/index.html
+Log In
+Username: admin
+Password: admin123
+
+#禁止匿名访问
+Security -> Users -> anonymous -> Status -> Disabled
+
+#权限设置
+#snapshots
+Security -> Privileges -> Add -> Repository Target Privilege -> 
+	Name: Snapshots
+	Description: Snapshots
+	Repository: Snapshots(Repo)
+	Repository Target: All(Maven2)
+ -> Save
+#releases
+Security -> Privileges -> Add -> Repository Target Privilege -> 
+	Name: Releases
+	Description: Releases
+	Repository: Releases(Repo)
+	Repository Target: All(Maven2)
+ -> Save
+#3rd party
+Security -> Privileges -> Add -> Repository Target Privilege -> 
+	Name: 3rd party
+	Description: 3rd party
+	Repository: 3rd party(Repo)
+	Repository Target: All(Maven2)
+ -> Save
+
+#角色设置
+Security -> Roles -> Add -> Nexus Role -> 
+	Role Id: programmer
+	Name: programmer
+	Description: programmer
+ -> Add
+ 	Nexus Anonymous Role
+ 	Repo:All Repositories(Read)
+ 	UI:Base UI Privileges
+ 	Snapshots-(create)
+ 	Snapshots-(delete)
+ 	Snapshots-(update)
+ -> Save
+
+Security -> Roles -> Add -> Nexus Role -> 
+	Role Id: teamleader
+	Name: teamleader
+	Description: teamleader
+ -> Add
+ 	programmer 
+ 	Releases-(create)
+ 	Releases-(delete)
+ 	Releases-(update)
+ 	Snapshots-(create)
+ 	Snapshots-(delete)
+ 	Snapshots-(update)
+ -> Save 
+ 

@@ -1,0 +1,119 @@
+yum -y remove automake autoconf libtool
+cd /tmp
+wget http://files.directadmin.com/services/custombuild/autoconf-2.68.tar.gz
+tar xf autoconf-2.68.tar.gz
+cd autoconf-2.68
+./configure && make && make install
+
+cd /tmp
+wget http://ftp.gnu.org/gnu/automake/automake-1.14.tar.xz
+yum -y install xz xz-devel
+tar xf automake-1.14.tar.xz
+cd automake-1.14
+./configure && make && make install
+
+cd /tmp 
+wget http://mirrors.ustc.edu.cn/gnu/libtool/libtool-2.4.2.tar.gz
+tar xf libtool-2.4.2.tar.gz
+cd libtool-2.4.2
+./configure && make && make install
+ 
+cd /opt
+yum -y install git
+git clone git://github.com/twitter/twemproxy.git
+cd twemproxy
+/usr/local/bin/autoreconf -fvi
+./configure --prefix=/usr/local/twemproxy --enable-debug=log
+make
+make install
+
+mkdir -p /usr/local/twemproxy/conf
+
+vi /usr/local/twemproxy/conf/nutcracker.yml
+alpha:
+  listen: 192.168.0.162:22121
+  hash: fnv1a_64
+  distribution: ketama
+  auto_eject_hosts: true
+  server_retry_timeout: 30000
+  server_failure_limit: 2
+  servers:
+   - 192.168.0.162:11211:1 
+   - 192.168.0.163:11211:1
+   - 192.168.0.164:11211:1
+   - 192.168.0.162:11212:1 
+   - 192.168.0.163:11212:1
+   - 192.168.0.164:11212:1
+
+mkdir -p /var/run/twemproxy
+
+cat > /etc/init.d/twemproxy << "EOF"
+#!/bin/sh
+# chkconfig: - 50 50
+# description: twemproxy
+# 以下要自己配置
+CMD=/usr/local/twemproxy/sbin/nutcracker
+PORT=22110
+CONF_FILE=/usr/local/twemproxy/conf/nutcracker.yml
+PID_FILE=/var/run/twemproxy/twemproxy.pid 
+LOG_FILE=/var/log/twemproxy.log
+
+start() {
+    count=`ps aux | grep '/usr/local/twemproxy/sbin/nutcracker' | grep -v grep | wc -l`
+    if [ $count != '1' ];then
+        $CMD -d -s $PORT -c $CONF_FILE -p $PID_FILE -o $LOG_FILE
+        echo -n $"twemproxy starting... " 
+        echo
+    else
+        echo -n $"twemproxy has already started... " 
+        echo
+    fi
+
+}
+
+stop() {
+    count=`ps aux | grep '/usr/local/twemproxy/sbin/nutcracker' | grep -v grep | wc -l`
+    if [ $count == '1' ];then
+        kill `ps aux |grep -v grep | grep '/usr/local/twemproxy/sbin/nutcracker' | awk '{print $2}'`
+        RETVAL=$?
+        if [ $RETVAL -eq 0 ] ; then
+            rm -f ${PID_FILE}
+        fi
+        echo -n $"twemproxy shutting down... "
+        echo
+    else
+        echo -n $"no twemproxy is started... "
+        echo
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+    echo $"Usage: $0 {start|stop|restart}"  
+    exit 1
+esac
+exit 0
+EOF
+
+chmod -R 744 /etc/init.d/twemproxy
+
+
+注：
+1.nutcracker中 -a 配置为本机服务器ip地址
+2./usr/local/twemproxy/conf/nutcracker.yml中：
+servers是memcache服务器IP地址和端口 
+listen配置为本机本机服务器ip地址和监听端口
+3.
+手动启动服务:
+nutcracker -d -s 22110 -a 192.168.0.161 -c /usr/local/twemproxy/conf/nutcracker1.yml -p /var/run/twemproxy/twemproxy.pid -o /var/log/twemproxy.log 
+

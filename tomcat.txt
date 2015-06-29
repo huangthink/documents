@@ -1,0 +1,26 @@
+#tomcat7安装
+cd /tmp
+wget -N http://archive.apache.org/dist/tomcat/tomcat-7/v7.0.52/bin/apache-tomcat-7.0.52.tar.gz
+tar -zxf apache-tomcat-7.0.52.tar.gz
+mv ./apache-tomcat-7.0.52 /usr/local/tomcat
+
+#设置内存
+vi /usr/local/tomcat/bin/catalina.sh
+JAVA_OPTS="
+  -server
+  -Xmx2048m 
+  -Xms2048m 
+  -Xss256k
+  -Xmn512m
+  -XX:PermSize=128m 
+  -XX:MaxPermSize=128m
+"
+
+#设置默认编码
+vi /usr/local/tomcat/conf/server.xml
+URIEncoding="UTF-8"
+
+#设置管理员
+vi /usr/local/tomcat/conf/tomcat-users.xml
+  <role rolename="manager-gui"/>
+  <user username="tomcat" password="tomcat" roles="manager-gui"/>

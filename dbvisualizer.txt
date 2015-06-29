@@ -1,0 +1,24 @@
+# root用户
+cd /tmp
+#wget -N http://192.168.0.159:8080/samba/files/dbvis.zip
+unzip dbvis.zip
+cd dbvis/bdbl916/Setup
+./dbvis_linux_9_1_6.sh 
+ 
+# 修改Destination directory of DbVisualizer to be installed
+/opt/dbvis
+
+# select additional tasks
+check "Create a desktop icon"
+
+# crack DbVisualizer Free 9.1.6 to DbVisualizer Pro 9.1.6
+cp /tmp/dbvis/bdbl916/Crack/dbvis.jar /opt/dbvis/lib/
+
+# 导入许可证
+Help --> License key... 然后导入/tmp/dbvis/bdbl916/Crack/dbvis.license文件 --> Install License key --> Restart
+
+# SQL乱码
+Tools --> tool Properties --> General --> Appearance --> Fonts --> Fonts Settings --> SQL Editor/Text Editor --> 文泉驿正黑
+
+#启动dbvis
+dbvis

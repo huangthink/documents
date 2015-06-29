@@ -1,0 +1,91 @@
+#root用户
+cd /tmp
+wget -N http://archive.apache.org/dist/lucene/solr/4.2.1/solr-4.2.1.tgz
+tar -zxf solr-4.2.1.tgz
+
+#webapps
+mkdir -p /opt/solr/webapps
+cd /opt/solr/webapps
+jar -xf /tmp/solr-4.2.1/example/webapps/solr.war
+
+#solr-home
+mkdir -p /opt/solr/home
+vi /opt/solr/home/solr.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<solr persistent="true">
+  <cores adminPath="/admin/cores" zkClientTimeout="${zkClientTimeout:15000}" hostPort="${jetty.port:}">
+    <core name="core0" instanceDir="/opt/solr/data/core0" shardid="shard1" collection="core0" collection.configName="core0"/>
+  </cores>
+</solr>
+
+#solr加入tomcat
+mkdir -p /opt/tomcat/conf/Catalina/localhost
+vi /opt/tomcat/conf/Catalina/localhost/solr.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<Context docBase="/opt/solr/webapps" reloadable="true">
+  <Environment name="solr/home" type="java.lang.String" value="/opt/solr/home" override="true" />
+</Context>
+
+#tomcat catelina.sh
+vi /opt/tomcat/bin/catalina.sh
+JAVA_OPTS="
+ -Xmx6G 
+ -Xms6G 
+ -Xss256K
+ -Xmn2300M 
+ -XX:SurvivorRatio=5 
+ -XX:+UseParNewGC
+ -XX:PermSize=128M 
+ -XX:MaxPermSize=128M
+ -XX:MaxDirectMemorySize=768m 
+ -XX:LargePageSizeInBytes=128m
+ -XX:+DisableExplicitGC  
+ -XX:SoftRefLRUPolicyMSPerMB=0
+ -XX:+OptimizeStringConcat 
+ -XX:+UseFastAccessorMethods
+ -XX:CompileThreshold=100
+ -XX:+AggressiveOpts
+ -XX:+TieredCompilation
+ -XX:+DoEscapeAnalysis
+ -XX:+UseBiasedLocking
+ -XX:+EliminateLocks
+ -XX:BiasedLockingStartupDelay=0
+ -XX:+UseConcMarkSweepGC
+ -XX:CMSInitiatingOccupancyFraction=70
+ -XX:+UseCMSCompactAtFullCollection
+ -XX:CMSFullGCsBeforeCompaction=2
+ -XX:+CMSParallelRemarkEnabled
+ -XX:+UseCMSInitiatingOccupancyOnly
+ -XX:+CMSClassUnloadingEnabled
+ -XX:+CMSPermGenPrecleaningEnabled
+ -Dsun.net.inetaddr.ttl=0
+ -Dnetworkaddress.cache.ttl=30
+ -Djava.awt.headless=true
+ -DAllowManagedFieldsInDefaultFetchGroup=true 
+ -DAllowMediatedWriteInDefaultFetchGroup=true
+ 
+ -Djetty.port=8080
+ -DzkHost=192.168.0.201:2181,192.168.0.202:2181,192.168.0.203:2181
+ -DzkClientTimeout=15000
+"
+
+#master's lib
+ln -s /opt/solr/webapps/WEB-INF/lib /opt/solr/lib
+
+#master's conf
+mkdir -p /opt/solr/conf
+
+#core0
+mkdir -p /opt/solr/conf/core0
+cp /tmp/solr-4.2.1/example/multicore/core0/conf/* /opt/solr/conf/core0
+java -cp .:/opt/solr/lib/* org.apache.solr.cloud.ZkCLI -cmd upconfig -zkhost 192.168.0.201:2181,192.168.0.202:2181,192.168.0.203:2181 -confdir /opt/solr/conf/core0 -confname core0 -solrhome /opt/solr/home
+
+#reload
+http://192.168.0.201:8080/solr/admin/cores?wt=json&action=RELOAD&core=core0
+http://192.168.0.202:8080/solr/admin/cores?wt=json&action=RELOAD&core=core0
+http://192.168.0.203:8080/solr/admin/cores?wt=json&action=RELOAD&core=core0
+
+#delete
+http://192.168.0.201:8080/solr/admin/collections?action=DELETE&name=core0
+http://192.168.0.202:8080/solr/admin/collections?action=DELETE&name=core0
+http://192.168.0.203:8080/solr/admin/collections?action=DELETE&name=core0
