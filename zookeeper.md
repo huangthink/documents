@@ -26,12 +26,9 @@ server.202=192.168.0.202:2888:3888
 server.203=192.168.0.203:2888:3888
 ```
 
-> * 192.168.0.201
-> `echo '201' > /opt/zookeeper/data/myid`
->  * 192.168.0.202
-> `echo '202' > /opt/zookeeper/data/myid`
->  * 192.168.0.203
-> `echo '203' > /opt/zookeeper/data/myid`
+> * 192.168.0.201 `echo '201' > /opt/zookeeper/data/myid`
+> * 192.168.0.202 `echo '202' > /opt/zookeeper/data/myid`
+> * 192.168.0.203 `echo '203' > /opt/zookeeper/data/myid`
 
 ##### 开机启动
 `echo '/opt/zookeeper/bin/zkServer.sh start' >> /etc/rc.d/rc.local`
