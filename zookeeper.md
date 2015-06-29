@@ -1,7 +1,9 @@
 ### zookeeper安装
+
 * 192.168.0.201(myid=201)
 * 192.168.0.202(myid=202)
 * 192.168.0.203(myid=203)
+
 ##### root用户
 
 ```
@@ -25,11 +27,11 @@ server.203=192.168.0.203:2888:3888
 ```
 
 > * 192.168.0.201
-`echo '201' > /opt/zookeeper/data/myid`
- * 192.168.0.202
-`echo '202' > /opt/zookeeper/data/myid`
- 8 192.168.0.203
-`echo '203' > /opt/zookeeper/data/myid`
+> `echo '201' > /opt/zookeeper/data/myid`
+>  * 192.168.0.202
+> `echo '202' > /opt/zookeeper/data/myid`
+>  * 192.168.0.203
+> `echo '203' > /opt/zookeeper/data/myid`
 
 ##### 开机启动
 `echo '/opt/zookeeper/bin/zkServer.sh start' >> /etc/rc.d/rc.local`
