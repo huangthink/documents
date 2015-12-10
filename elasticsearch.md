@@ -17,7 +17,8 @@ cd /user/local/elasticsearch/bin/service
 sh elasticsearch start
 sh elasticsearch stop
 
-#### head
+#### plugin
 
 cd /usr/local/elasticsearch/bin
 ./plugin -i mobz/elasticsearch-head 
+./plugin -i elasticsearch/marvel/latest
